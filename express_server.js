@@ -21,7 +21,6 @@ app.get('/urls', (req, res) => {
 app.get('/urls/:shortURL', (req, res) => {
   const longURL = urlDatabase[req.params.shortURL].longURL; // Accessing the longURL
   const templateVars = { shortURL: req.params.shortURL, longURL: longURL };
-
   res.render('urls_show', templateVars);
 });
 
