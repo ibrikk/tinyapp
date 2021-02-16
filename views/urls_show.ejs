@@ -22,6 +22,7 @@
 </header>
 
 <body>
+  <%- include('partials/_header') %>
   <div class="card text-center">
       <div class="card-header"></div>
       <div class="card-body">
@@ -29,9 +30,12 @@
         <p class="card-text">Short URL: <a href="/u/<%= shortURL %>"><%= shortURL %></a></p>
       </div>
       <div class='card-footer text=muted'>
+        <h5>Edit</h5>
         <form method='POST' action='/urls/<%= shortURL %>/edit'>
-          <h5>Edit</h5>
+          <p> NEW URL:
+            <input type='text' name='longURL'/>
           <button class='btn-primary' type='submit' value='submit'> SUBMIT </button>
+        </p>
         </form>
       </div>
     <div class="card-footer text-muted"></div>
