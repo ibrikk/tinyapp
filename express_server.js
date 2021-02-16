@@ -4,7 +4,6 @@ const app = express();
 const PORT = 8080;
 const cookie = require('cookie-parser');
 
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookie());
 app.set('view engine', 'ejs');
@@ -71,7 +70,7 @@ app.get('/urls/:shortURL', (req, res) => {
 };
   res.render('urls_show', templateVars);
 });
-
+// Deleting a URL
 app.post('/urls/:shortURL/delete', (req, res) => {
   delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
@@ -83,7 +82,7 @@ app.get('/u/:shortURL', (req, res) => {
   const longURL = urlDatabase[shortURL];
   res.redirect(longURL);
 });
-
+// Takes to the edit page
 app.post('/urls/:shortURL/edit', (req, res) => {
   const key = req.params.shortURL;
   urlDatabase[key] = req.body.longURL;
@@ -97,7 +96,11 @@ app.post('/login', (req, res) => {
   }
   res.redirect('./urls');
 }); 
-
+// Logout endpoint
+app.post('/logout', (req, res) => {
+  res.clearCookie('username');
+  res.redirect('/urls');
+});
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`)
