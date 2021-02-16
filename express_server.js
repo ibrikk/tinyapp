@@ -8,23 +8,25 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cookie());
 app.set('view engine', 'ejs');
 
-const generateRandomString = () => { // generating a unique shortURL of 6 digits
+const generateRandomString = () => {
+  // generating a unique shortURL of 6 digits
   let res = '';
-  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const chars =
+    '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   for (let i = 6; i > 0; i--) {
     res += chars[Math.floor(Math.random() * 6)];
   }
   return res;
-}
-
+};
 
 const urlDatabase = {
-  'b2xVn2': 'http://www.lighthouselabs.ca', 
+  b2xVn2: 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
 };
 
-app.get('/', (req, res) => { // Homepage returns Hello
-  res.send('Hello!')
+app.get('/', (req, res) => {
+  // Homepage returns Hello
+  res.send('Hello!');
 });
 
 app.get('/hello', (req, res) => {
@@ -40,24 +42,24 @@ app.post('/urls', (req, res) => {
   const shortURL = generateRandomString();
   const newURL = req.body.longURL;
   urlDatabase[shortURL] = {
-    longURL: newURL
+    longURL: newURL,
   };
   res.redirect(`urls/${shortURL}`);
 });
 
 app.get('/urls', (req, res) => {
-  let templateVars = { 
+  let templateVars = {
     username: req.cookies['username'],
-    urls: urlDatabase
+    urls: urlDatabase,
   };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
-  let templateVars = { 
-    username: req.cookies['username']
-}
-  res.render("urls_new", templateVars);
+  let templateVars = {
+    username: req.cookies['username'],
+  };
+  res.render('urls_new', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
@@ -66,8 +68,8 @@ app.get('/urls/:shortURL', (req, res) => {
   let templateVars = {
     shortURL,
     longURL,
-    username: req.cookies['username']
-};
+    username: req.cookies['username'],
+  };
   res.render('urls_show', templateVars);
 });
 // Deleting a URL
@@ -90,12 +92,12 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 });
 // Login endpoint
 app.post('/login', (req, res) => {
-  if(req.body.username) {
+  if (req.body.username) {
     const username = req.body.username;
     res.cookie('username', username);
   }
   res.redirect('./urls');
-}); 
+});
 // Logout endpoint
 app.post('/logout', (req, res) => {
   res.clearCookie('username');
@@ -103,5 +105,5 @@ app.post('/logout', (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`)
+  console.log(`Example app listening on port ${PORT}!`);
 });
