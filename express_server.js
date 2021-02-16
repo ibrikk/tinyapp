@@ -3,6 +3,10 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = 8080;
 
+
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set('view engine', 'ejs');
+
 const generateRandomString = () => { // generating a unique shortURL of 6 digits
   let res = '';
   const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -11,9 +15,6 @@ const generateRandomString = () => { // generating a unique shortURL of 6 digits
   }
   return res;
 }
-
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set('view engine', 'ejs');
 
 
 const urlDatabase = {
@@ -62,10 +63,15 @@ app.get('/urls/:shortURL', (req, res) => {
   res.render('urls_show', templateVars);
 });
 
+app.post('/urls/:shortURL/delete', (req, res) => {
+  delete urlDatabase[req.params.shortURL];
+  res.redirect('/urls');
+});
+
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
-  res.redirect(longURL);
+  res.redirect(lonURL);
 });
 
 
