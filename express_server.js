@@ -3,18 +3,18 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = 8080;
 
-function generateRandomString() {
+const generateRandomString = () => { // generating a unique shortURL of 6 digits
   let res = '';
+  const chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
   for (let i = 6; i > 0; i--) {
-    res += '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'[Math.floor(Math.random() * 6)];
+    res += chars[Math.floor(Math.random() * 6)];
   }
   return res;
 }
 
- // console.log(generateRandomString());  - testing if the function works
+app.use(bodyParser.urlencoded({ extended: true }));
 app.set('view engine', 'ejs');
 
-app.use(bodyParser.urlencoded({ extended: true }));
 
 const urlDatabase = {
   'b2xVn2': 'http://www.lighthouselabs.ca', 
@@ -25,13 +25,26 @@ app.get('/', (req, res) => { // Homepage returns Hello
   res.send('Hello!')
 });
 
+app.get('/hello', (req, res) => {
+  res.send('<html><body>Hello <b>World</b></body></html>\n'); // Passing html
+});
+
+app.get('/urls.json', (req, res) => {
+  res.json(urlDatabase);
+});
+
 app.post('/urls', (req, res) => {
   console.log(req.body); // Logging POST request body to the console
-  res.send('Ok');
+  const shortURL = generateRandomString();
+  const newURL = req.body.longURL;
+  urlDatabase[shortURL] = {
+    longURL: newURL
+  };
+  res.redirect(`urls/${shortURL}`);
 });
 
 app.get('/urls', (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  let templateVars = { urls: urlDatabase };
   res.render('urls_index', templateVars);
 });
 
@@ -40,17 +53,19 @@ app.get('/urls/new', (req, res) => {
 });
 
 app.get('/urls/:shortURL', (req, res) => {
-  const longURL = urlDatabase[req.params.shortURL].longURL; // Accessing the longURL
-  const templateVars = { shortURL: req.params.shortURL, longURL: longURL };
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL]; // Accessing the longURL
+  let templateVars = {
+    shortURL,
+    longURL
+  };
   res.render('urls_show', templateVars);
 });
 
-app.get('/urls.json', (req, res) => {
-  res.json(urlDatabase);
-});
-
-app.get('/hello', (req, res) => {
-  res.send('<html><body>Hello <b>World</b></body></html>\n'); // Passing html
+app.get('/u/:shortURL', (req, res) => {
+  const shortURL = req.params.shortURL;
+  const longURL = urlDatabase[shortURL];
+  res.redirect(longURL);
 });
 
 
