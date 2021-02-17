@@ -123,12 +123,22 @@ app.get('/register', (req, res) => {
   }
   res.render('urls_registration', templateVars);
 });
-
+// Adding a user
 const addUser = newUser => {
   const newUserID = generateRandomString();
   newUser.id = newUserID;
   users[newUserID] = newUser;
   return newUser;
+}
+
+// Checking if the username is registered
+const notAvail = (val, db) => {
+  for (user in db) {
+    if (user[val]) {
+      return true;
+    }
+  }
+  return null;
 }
 
 app.post('/register', (req, res) => {
@@ -137,7 +147,10 @@ app.post('/register', (req, res) => {
     res.status(400).send('Email is missing');
   } 
   if (password === '') {
-    res.status(400).send('Password is missing')
+    res.status(400).send('Password is missing');
+  }
+  if (notAvail(email, db)) {
+    res.status(400).send('This email is not available');
   }
   newUser = addUser(req.body);
   res.cookie('user_id', newUser.id);
