@@ -24,6 +24,19 @@ const urlDatabase = {
   '9sm5xK': 'http://www.google.com',
 };
 
+const users = { 
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
+  }
+}
+
 app.get('/', (req, res) => {
   // Homepage returns Hello
   res.send('Hello!');
@@ -49,7 +62,7 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls', (req, res) => {
   let templateVars = {
-    username: req.cookies['username'],
+    user_id: req.cookies['user_id'],
     urls: urlDatabase,
   };
   res.render('urls_index', templateVars);
@@ -57,7 +70,7 @@ app.get('/urls', (req, res) => {
 
 app.get('/urls/new', (req, res) => {
   let templateVars = {
-    username: req.cookies['username'],
+    user_id: req.cookies['user_id'],
   };
   res.render('urls_new', templateVars);
 });
@@ -68,7 +81,7 @@ app.get('/urls/:shortURL', (req, res) => {
   let templateVars = {
     shortURL,
     longURL,
-    username: req.cookies['username'],
+    user_id: req.cookies['user_id'],
   };
   res.render('urls_show', templateVars);
 });
@@ -92,15 +105,42 @@ app.post('/urls/:shortURL/edit', (req, res) => {
 });
 // Login endpoint
 app.post('/login', (req, res) => {
-  if (req.body.username) {
-    const username = req.body.username;
-    res.cookie('username', username);
+  if (req.body.user_id) {
+    const user_id = req.body.user_id;
+    res.cookie('user_id', user_id);
   }
   res.redirect('./urls');
 });
 // Logout endpoint
 app.post('/logout', (req, res) => {
-  res.clearCookie('username');
+  res.clearCookie('user_id');
+  res.redirect('/urls');
+});
+
+app.get('/register', (req, res) => {
+  let templateVars = {
+    user_id: req.cookies.user_id
+  }
+  res.render('urls_registration', templateVars);
+});
+
+const addUser = newUser => {
+  const newUserID = generateRandomString();
+  newUser.id = newUserID;
+  users[newUserID] = newUser;
+  return newUser;
+}
+
+app.post('/register', (req, res) => {
+  const {email, password } = req.body;
+  if (email === '') {
+    res.status(400).send('Email is missing');
+  } 
+  if (password === '') {
+    res.status(400).send('Password is missing')
+  }
+  newUser = addUser(req.body);
+  res.cookie('user_id', newUser.id);
   res.redirect('/urls');
 });
 

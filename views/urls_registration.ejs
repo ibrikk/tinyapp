@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Bootstrap CSS -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/css/bootstrap.min.css"
+      integrity="sha384-GJzZqFGwb1QTTN6wy59ffF1BuGJpLSa9DkKMp0DgiMDm4iYMj70gZWKYbI706tWS"
+      crossorigin="anonymous"
+    />
+    <title>Registration Page</title>
+  </head>
+  <body>
+    <%- include('partials/_header') %>
+
+    <h2>Create an Account</h2>
+    <div>
+      <form method="POST" action="/register">
+        <h5>Email:</h5>
+        <input type="email" name="email" />
+        <h6>Password:</h6>
+        <input type="password" name="password" />
+        <button type='submit' class='btn btn-primary'>SUBMIT</button>
+      </form>
+    </div>
+
+    <main style="margin: 1em"></main>
+  </body>
+</html>
