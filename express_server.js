@@ -37,6 +37,14 @@ const users = {
   }
 }
 
+const userLoggedIn = cookie => {
+  for (let id in users) {
+    if (cookie === id) {
+      return users[id].email;
+    }
+  }
+}
+
 app.get('/', (req, res) => {
   // Homepage returns Hello
   res.send('Hello!');
@@ -62,22 +70,26 @@ app.post('/urls', (req, res) => {
 
 app.get('/urls', (req, res) => {
   let templateVars = {
-    user_id: req.cookies['user_id'],
+    currentUser: userLoggedIn(req.cookies.user_id),
     urls: urlDatabase,
   };
   res.render('urls_index', templateVars);
 });
 
 app.get('/urls/new', (req, res) => {
+    const currentUser = userLoggedIn(req.cookies.user_id)
+  if (!currentUser) {
+    res.redirect('/urls');
+  }
   let templateVars = {
-    user_id: req.cookies['user_id'],
-  };
+    currentUser: currentUser
+  }
   res.render('urls_new', templateVars);
 });
 
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const longURL = urlDatabase[shortURL]; // Accessing the longURL
+  const longURL = urlDatabase[req.params.shortURL]; // Accessing the longURL
   let templateVars = {
     shortURL,
     longURL,
@@ -91,7 +103,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-// Redirecting to short URL
+// Redirecting to longURL
 app.get('/u/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const longURL = urlDatabase[shortURL];
@@ -119,7 +131,7 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   let templateVars = {
-    user_id: req.cookies.user_id
+    currentUser: req.cookies.user_id
   }
   res.render('urls_registration', templateVars);
 });
@@ -142,7 +154,8 @@ const notAvail = (val, db) => {
 }
 
 app.post('/register', (req, res) => {
-  const {email, password } = req.body;
+  const {password } = req.body;
+  const email = req.body.email;
   if (email === '') {
     res.status(400).send('Email is missing');
   } 
@@ -152,9 +165,16 @@ app.post('/register', (req, res) => {
   if (notAvail(email, db)) {
     res.status(400).send('This email is not available');
   }
-  newUser = addUser(req.body);
+  newUser = addUser(req.body, users);
   res.cookie('user_id', newUser.id);
   res.redirect('/urls');
+});
+
+app.get('/login', (req, res) => {
+  let templateVars = {
+    currentUser: userLoggedIn(req.cookies.user_id)
+  }
+  res.render('urls_login', templateVars);
 });
 
 app.listen(PORT, () => {
