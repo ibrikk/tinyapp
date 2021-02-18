@@ -21,7 +21,8 @@ const {
   checkShortURL,
   checkIfOwned,
   urlsForUser,
-  userLoggedIn
+  userLoggedIn,
+  addUser
 } = require('./helper_functions');
 
 const urlDatabase = {
@@ -68,8 +69,8 @@ app.post('/register', (req, res) => {
     res.status(403).send('This email is not available');
   } else {
     req.body.password = hashedPwd;
-  newUser = addUser(req.body, users);
-  res.session('user_id', newUser.id);
+  const newUser = addUser(req.body, users);
+  req.session.userId = newUser.id;
   res.redirect('/urls');
   }
 });
@@ -103,8 +104,8 @@ app.get('/urls', (req, res) => {
   if (!currentUser) {
     res.send('Sign In or Register')
   }
-  const userLinks = urlsForUser(currentUser, urlDatabase);
-  let templateVars = { urls: urlDatabase, currentUser: userLoggedIn(req.session.user_id, users) };
+  const usersLinks = urlsForUser(currentUser, urlDatabase);
+  let templateVars = { urls: usersLinks, currentUser: userLoggedIn(req.session.user_id, users) };
   res.render(`urls_index`, templateVars);
 });
 
@@ -116,7 +117,7 @@ app.post('/urls', (req, res) => {
  urlDatabase[shortURL] = {longURL: newURL, userID: user};
  res.redirect(`/urls/${shortURL}`);
   } else {
-    res.redirect('/login');
+  res.redirect('/login');
   }
 });
 
@@ -191,13 +192,6 @@ app.post('/logout', (req, res) => {
   res.redirect('/urls');
 });
 
-// Adding a user
-const addUser = (newUser) => {
-  const newUserID = generateRandomString();
-  newUser.id = newUserID;
-  users[newUserID] = newUser;
-  return newUser;
-};
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);

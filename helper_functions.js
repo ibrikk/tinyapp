@@ -1,5 +1,7 @@
+const bcrypt = require('bcrypt');
+
+// generating a unique shortURL of 6 digits
 const generateRandomString = () => {
-  // generating a unique shortURL of 6 digits
   let res = '';
   const chars =
     '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -11,12 +13,12 @@ const generateRandomString = () => {
 
 // Checking if the username is registered
 const notAvail = (val, db) => {
-  for (user in db) {
-    if (user[val]) {
+  for (let user in db) {
+    if (db[user].email !== val) {
       return true;
     }
   }
-  return null;
+  return false;
 };
 
 const fetchUserData = (email, db) => {
@@ -25,8 +27,9 @@ const fetchUserData = (email, db) => {
       return db[key];
     }
   }
+  return undefined;
 };
-
+// Checks if a shortURL exists
 const checkShortURL = (URL, db) => {
   return db[URL];
 }
@@ -44,15 +47,24 @@ const urlsForUser = (id, db) => {
     }
   }
   return userURLs;
-  }
-
+  };
+// checks the current user
   const userLoggedIn = (cookie, db) => {
     for (let id in db) {
       if (cookie === id) {
         return db[id].email;
       }
     }
-  }
+  };
+
+  // Adding a user
+const addUser = (newUser, db) => {
+  const newUserID = generateRandomString();
+  newUser.id = newUserID;
+  newUser.password = bcrypt.hashSync(newUser.password, 10);
+  db[newUserID] = newUser;
+  return newUser;
+};
 
   module.exports = {
     generateRandomString,
@@ -61,5 +73,6 @@ const urlsForUser = (id, db) => {
     checkShortURL,
     checkIfOwned,
     urlsForUser,
-    userLoggedIn
+    userLoggedIn,
+    addUser
   }
