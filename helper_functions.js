@@ -32,11 +32,11 @@ const fetchUserData = (email, db) => {
 // Checks if a shortURL exists
 const checkShortURL = (URL, db) => {
   return db[URL];
-}
+};
 
 const checkIfOwned = (userID, urlID, db) => {
   return userID === db[urlID].userID;
-}
+};
 
 const urlsForUser = (id, db) => {
   let currentUserId = id;
@@ -47,17 +47,17 @@ const urlsForUser = (id, db) => {
     }
   }
   return userURLs;
-  };
+};
 // checks the current user
-  const userLoggedIn = (cookie, db) => {
-    for (let id in db) {
-      if (cookie === id) {
-        return db[id].email;
-      }
+const userLoggedIn = (cookie, db) => {
+  for (let id in db) {
+    if (cookie === id) {
+      return db[id].email;
     }
-  };
+  }
+};
 
-  // Adding a user
+// Adding a user
 const addUser = (newUser, db) => {
   const newUserID = generateRandomString();
   newUser.id = newUserID;
@@ -66,13 +66,13 @@ const addUser = (newUser, db) => {
   return newUser;
 };
 
-  module.exports = {
-    generateRandomString,
-    notAvail,
-    fetchUserData,
-    checkShortURL,
-    checkIfOwned,
-    urlsForUser,
-    userLoggedIn,
-    addUser
-  }
+module.exports = {
+  generateRandomString,
+  notAvail,
+  fetchUserData,
+  checkShortURL,
+  checkIfOwned,
+  urlsForUser,
+  userLoggedIn,
+  addUser,
+};
