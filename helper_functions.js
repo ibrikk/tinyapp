@@ -40,7 +40,7 @@ const urlsForUser = (id, db) => {
   let userURLs = {};
   for (let key in db) {
     if (db[key].userID == currentUserId) {
-      usersURLs[key] = db[key];
+      userURLs[key] = db[key];
     }
   }
   return userURLs;
