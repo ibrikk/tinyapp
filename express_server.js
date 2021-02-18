@@ -19,31 +19,49 @@ const generateRandomString = () => {
   return res;
 };
 
+// Checking if the username is registered
+const notAvail = (val, db) => {
+  for (user in db) {
+    if (user[val]) {
+      return true;
+    }
+  }
+  return null;
+};
+
+const fetchUserData = (email, db) => {
+  for (let key in db) {
+    if (db[key].email === email) {
+      return db[key];
+    }
+  }
+};
+
 const urlDatabase = {
   b2xVn2: 'http://www.lighthouselabs.ca',
   '9sm5xK': 'http://www.google.com',
 };
 
-const users = { 
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
+const users = {
+  userRandomID: {
+    id: 'userRandomID',
+    email: 'user@example.com',
+    password: 'purple-monkey-dinosaur',
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
-  }
-}
+  user2RandomID: {
+    id: 'user2RandomID',
+    email: 'user2@example.com',
+    password: 'dishwasher-funk',
+  },
+};
 
-const userLoggedIn = cookie => {
+const userLoggedIn = (cookie) => {
   for (let id in users) {
     if (cookie === id) {
       return users[id].email;
     }
   }
-}
+};
 
 app.get('/', (req, res) => {
   // Homepage returns Hello
@@ -77,13 +95,13 @@ app.get('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-    const currentUser = userLoggedIn(req.cookies.user_id)
+  const currentUser = userLoggedIn(req.cookies.user_id, users);
   if (!currentUser) {
-    res.redirect('/urls');
+    res.redirect('/login');
   }
   let templateVars = {
     currentUser: currentUser
-  }
+  };
   res.render('urls_new', templateVars);
 });
 
@@ -115,13 +133,23 @@ app.post('/urls/:shortURL/edit', (req, res) => {
   urlDatabase[key] = req.body.longURL;
   res.redirect('/urls');
 });
-// Login endpoint
+// Login endpoint refactored
 app.post('/login', (req, res) => {
-  if (req.body.user_id) {
-    const user_id = req.body.user_id;
-    res.cookie('user_id', user_id);
-  }
-  res.redirect('./urls');
+    const userEmail = req.body.email;
+    const passwordUsed = req.body.password;
+    if (fetchUserData(userEmail, users)) {
+      const password = fetchUserData(userEmail, users).password;
+      const id = fetchUserData(userEmail, users).id;
+      if (password !== passwordUsed) {
+        res.status(403).send('ERROR!!! Password incorrect');
+      } else {
+        res.cookie('user_id', id);
+        res.redirect('./urls');
+      }
+    } else {
+      res.status(403).send('ERROR!!! No email found');
+    }
+  
 });
 // Logout endpoint
 app.post('/logout', (req, res) => {
@@ -131,39 +159,31 @@ app.post('/logout', (req, res) => {
 
 app.get('/register', (req, res) => {
   let templateVars = {
-    currentUser: req.cookies.user_id
-  }
+    currentUser: req.cookies.user_id,
+  };
   res.render('urls_registration', templateVars);
 });
 // Adding a user
-const addUser = newUser => {
+const addUser = (newUser) => {
   const newUserID = generateRandomString();
   newUser.id = newUserID;
   users[newUserID] = newUser;
   return newUser;
-}
+};
 
-// Checking if the username is registered
-const notAvail = (val, db) => {
-  for (user in db) {
-    if (user[val]) {
-      return true;
-    }
-  }
-  return null;
-}
+
 
 app.post('/register', (req, res) => {
-  const {password } = req.body;
+  const { password } = req.body;
   const email = req.body.email;
   if (email === '') {
-    res.status(400).send('Email is missing');
-  } 
-  if (password === '') {
-    res.status(400).send('Password is missing');
+    res.status(403).send('Email is missing');
   }
-  if (notAvail(email, db)) {
-    res.status(400).send('This email is not available');
+  if (password === '') {
+    res.status(403).send('Password is missing');
+  }
+  if (notAvail(email, users)) {
+    res.status(403).send('This email is not available');
   }
   newUser = addUser(req.body, users);
   res.cookie('user_id', newUser.id);
@@ -172,8 +192,8 @@ app.post('/register', (req, res) => {
 
 app.get('/login', (req, res) => {
   let templateVars = {
-    currentUser: userLoggedIn(req.cookies.user_id)
-  }
+    currentUser: userLoggedIn(req.cookies.user_id, users),
+  };
   res.render('urls_login', templateVars);
 });
 

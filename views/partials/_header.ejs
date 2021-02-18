@@ -16,12 +16,9 @@
             <button type='submit' class='btn btn-dark'>Logout</button>
           </form>
        <% } else { %>
-        <form method='POST' action='/login'>
-          <input type='text' name='user_id' placeholder='User_id' required>
-          <button type='submit' class='btn-outline-dark'>SUBMIT</button>
-        </form>
-        <a href="/login" class="btn btn-success">Login</a>
-        <a href="/register" class="btn btn-success">Register</a>
+        
+        <a href="/login" class="btn btn-success" style='position: absolute; right: 75px'>Login</a>
+        <a href="/register" class="btn btn-success" style='position: absolute; right: 0px'>Register</a>
       <% } %>
     </div>
   </nav>
