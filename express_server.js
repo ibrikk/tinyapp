@@ -2,12 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const PORT = 8080;
-const cookie = require('cookie-parser');
+const cookieSession = require('cookie-session');
 const bcrypt = require('bcrypt');
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cookie());
+app.use(cookieSession({
+  name: 'session',
+  keys: ['user_id']
+}));
+
 app.set('view engine', 'ejs');
+
 
 const {
   generateRandomString,
@@ -44,7 +49,7 @@ app.get('/', (req, res) => {
 
 app.get('/register', (req, res) => {
   let templateVars = {
-    currentUser: userLoggedIn(req.cookies.user_id, users)
+    currentUser: userLoggedIn(req.session.user_id, users)
   };
   res.render('urls_registration', templateVars);
 });
@@ -64,14 +69,14 @@ app.post('/register', (req, res) => {
   } else {
     req.body.password = hashedPwd;
   newUser = addUser(req.body, users);
-  res.cookie('user_id', newUser.id);
+  res.session('user_id', newUser.id);
   res.redirect('/urls');
   }
 });
 
 app.get('/login', (req, res) => {
   let templateVars = {
-    currentUser: userLoggedIn(req.cookies.user_id, users)
+    currentUser: userLoggedIn(req.session.user_id, users)
   };
   res.render('urls_login', templateVars);
 });
@@ -85,7 +90,7 @@ app.post('/login', (req, res) => {
     if (bcrypt.compareSync(passwordUsed, password)) {
       res.status(403).send('ERROR!!! Password incorrect');
     } else {
-      res.cookie('user_id', id);
+      req.session.user_id = id;
       res.redirect('/urls');
     }
   } else {
@@ -94,20 +99,20 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/urls', (req, res) => {
-  const currentUser = userLoggedIn(req.cookies.user_id, users);
+  const currentUser = userLoggedIn(req.session.user_id, users);
   if (!currentUser) {
     res.send('Sign In or Register')
   }
   const userLinks = urlsForUser(currentUser, urlDatabase);
-  let templateVars = { urls: urlDatabase, currentUser: userLoggedIn(req.cookies.user_id, users) };
+  let templateVars = { urls: urlDatabase, currentUser: userLoggedIn(req.session.user_id, users) };
   res.render(`urls_index`, templateVars);
 });
 
 app.post('/urls', (req, res) => {
-  if (req.cookies) {
+  if (req.session) {
  const shortURL = generateRandomString();
  const newURL = req.body.longURL;
- const user = userLoggedIn(req.cookies.user_id, users);
+ const user = userLoggedIn(req.session.user_id, users);
  urlDatabase[shortURL] = {longURL: newURL, userID: user};
  res.redirect(`/urls/${shortURL}`);
   } else {
@@ -117,7 +122,7 @@ app.post('/urls', (req, res) => {
 
 
 app.get('/urls/new', (req, res) => {
-  const currentUser = userLoggedIn(req.cookies.user_id, users);
+  const currentUser = userLoggedIn(req.session.user_id, users);
   if (!currentUser) {
     res.redirect('/login');
   } else {
@@ -130,7 +135,7 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  const currentUser = userLoggedIn(req.cookies.user_id, users);
+  const currentUser = userLoggedIn(req.session.user_id, users);
   if (!urlDatabase[shortURL]) {
     res.send('Link does not exist');
   }
@@ -139,7 +144,7 @@ app.get('/urls/:shortURL', (req, res) => {
   }
   if (checkShortURL(shortURL, urlDatabase)) {
     let longURL = urlDatabase[req.params.shortURL].longURL; // Accessing the longURL
-    let templateVars = { shortURL: shortURL, longURL: longURL, current_user: userLoggedIn(req.cookies.user_id, users)};
+    let templateVars = { shortURL: shortURL, longURL: longURL, current_user: userLoggedIn(req.session.user_id, users)};
     res.render('urls_show', templateVars);
   } else {
     res.send('Does not exist')
@@ -158,7 +163,7 @@ app.get('/u/:shortURL', (req, res) => {
 
 // Deleting a URL
 app.post('/urls/:shortURL/delete', (req, res) => {
-  const currentUser = userLoggedIn(req.cookies.user_id, users);
+  const currentUser = userLoggedIn(req.session.user_id, users);
   const shortURL = req.params.shortURL;
   if (currentUser !== urlDatabase[shortURL].userID) {
     res.send('This ID does not belong to you');
@@ -169,7 +174,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 
 // Takes to the edit page
 app.post('/urls/:shortURL/edit', (req, res) => {
-  if (!checkIfOwned(userLoggedIn(req.cookies.user_id, users), req.params.shortURL, urlDatabase)) {
+  if (!checkIfOwned(userLoggedIn(req.session.user_id, users), req.params.shortURL, urlDatabase)) {
     res.send('This ID does not belong to you');
   }
   urlDatabase[req.params.shortURL].longURL = req.body.longURL;
@@ -182,7 +187,7 @@ app.get('/urls.json', (req, res) => {
 
 // Logout endpoint
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
+  req.session = null;
   res.redirect('/urls');
 });
 
