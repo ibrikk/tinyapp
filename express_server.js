@@ -27,7 +27,7 @@ const {
 } = require('./helper_functions');
 
 const urlDatabase = {
-  b2xVn2: { longURL: 'http://www.lighthouselabs.ca', userID: 'ibrik96' },
+  'b2xVn2': { longURL: 'http://www.lighthouselabs.ca', userID: 'ibrik96' },
   '9sm5xK': { longURL: 'http://www.google.com', userID: 'ibrik96' },
 };
 
@@ -35,14 +35,16 @@ const users = {
   ibrik96: {
     id: 'ibrik96',
     email: 'ibrahim@khalilov.com',
-    password: 'ibrik96',
   },
   nijat11: {
     id: 'nijat11',
     email: 'nijat11@gmail.com',
-    password: 'nijat11',
+    
   },
 };
+
+users.ibrik96.password = bcrypt.hashSync('ibrik96', 10);
+users.nijat11.password = bcrypt.hashSync('nijat11', 10);
 
 app.get('/', (req, res) => {
   const user = userLoggedIn(req.session.userId, users);
@@ -100,10 +102,7 @@ app.post('/login', (req, res) => {
   const temp = fetchUserData(userEmail, users); 
   if (temp) {
     const [ id, password] = temp;
-    console.log('passwordUsed: ' + passwordUsed);
-    console.log('password: ' + password);
-   // if (!bcrypt.compareSync(passwordUsed, password)) {
-    if (passwordUsed !== password) {
+    if (!bcrypt.compareSync(passwordUsed, password)) {
       res.status(403).send('ERROR!!! Password incorrect');
     } else {
       req.session.userId = id;
@@ -116,13 +115,16 @@ app.post('/login', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const user = userLoggedIn(req.session.userId, users);
+  // console.log(user);
   if (!user) {
     res.render('urls_errors');
   } else {
-    const usersLinks = urlsForUser(user, urlDatabase);
+    const userLinks = urlsForUser(user.id, urlDatabase);
+    console.log('userLinks');
+    console.log(userLinks);
     let templateVars = {
-      urls: usersLinks,
-      currentUser: userLoggedIn(req.session.userId, users)
+      urls: userLinks,
+      currentUser: user
     };
     res.render(`urls_index`, templateVars);
   }
@@ -152,9 +154,13 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
+  console.log('shortURL');
+  console.log(shortURL);
   const user = userLoggedIn(req.session.userId, users);
+  console.log('user');
+  console.log(user);
   if (checkShortURL(shortURL, urlDatabase)) {
-    if (user !== urlDatabase[shortURL].userID) {
+    if (user.id !== urlDatabase[shortURL].userID) {
       res.send('Wrong ID');
     } else {
       const longURL = urlDatabase[shortURL].longURL;
@@ -178,7 +184,14 @@ app.get('/u/:shortURL', (req, res) => {
 
 // Deleting a URL
 app.post('/urls/:shortURL/delete', (req, res) => {
-if (!checkIfOwned(userLoggedIn(req.session.userId, users), req.params.shortURL, urlDatabase)) {
+  console.log('req.params.shortURL')
+  console.log(req.params.shortURL)
+  console.log('req.session.userId')
+  console.log(req.session.userId)
+  const user = userLoggedIn(req.session.userId, users);
+  const check = checkIfOwned(user.id, req.params.shortURL, urlDatabase)
+ 
+if (!check) {
   res.send('Wrong ID')
 } else {
   delete urlDatabase[req.params.shortURL];

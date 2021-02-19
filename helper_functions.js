@@ -49,12 +49,15 @@ const urlsForUser = (id, db) => {
   return userURLs;
 };
 // checks the current user
-const userLoggedIn = (cookie, db) => {
-  for (let id in db) {
-    if (cookie === id) {
-      return db[id].email;
+const userLoggedIn = (cookieUser, db) => {
+ 
+  for (let key in db) {
+
+    if (cookieUser.id === db[key].id && cookieUser.password === db[key].password) {
+      return db[key];
     }
   }
+  return undefined;
 };
 
 // Adding a user
