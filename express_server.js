@@ -120,8 +120,8 @@ app.get('/urls', (req, res) => {
     res.render('urls_errors');
   } else {
     const userLinks = urlsForUser(user.id, urlDatabase);
-    console.log('userLinks');
-    console.log(userLinks);
+    // console.log('userLinks');
+    // console.log(userLinks);
     let templateVars = {
       urls: userLinks,
       currentUser: user
@@ -159,8 +159,11 @@ app.get('/urls/:shortURL', (req, res) => {
   const user = userLoggedIn(req.session.userId, users);
   console.log('user');
   console.log(user);
+  console.log('urlDatabase')
+  console.log(urlDatabase)
+
   if (checkShortURL(shortURL, urlDatabase)) {
-    if (user.id !== urlDatabase[shortURL].userID) {
+    if (user && user.id !== urlDatabase[shortURL].userID.id) {
       res.send('Wrong ID');
     } else {
       const longURL = urlDatabase[shortURL].longURL;

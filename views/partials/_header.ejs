@@ -11,8 +11,10 @@
       </div>
       <div>
         <% if (userLoggedIn) { %>
+          <% console.log('userLoggedIn') %>
+          <% console.log(userLoggedIn) %>
           <form method='POST' action='/logout'>
-            <span> Logged In As <%= userLoggedIn %></span>
+            <span> Logged In As <%= userLoggedIn.email %></span>
             <button type='submit' class='btn btn-dark'>Logout</button>
           </form>
        <% } else { %>

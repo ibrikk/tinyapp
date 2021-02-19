@@ -35,6 +35,9 @@ const checkShortURL = (URL, db) => {
 };
 
 const checkIfOwned = (userID, urlID, db) => {
+  if (!userID) {
+    return false;
+  }
   return userID === db[urlID].userID;
 };
 
@@ -51,17 +54,20 @@ const urlsForUser = (id, db) => {
 // checks the current user
 const userLoggedIn = (cookieUser, db) => {
  
-  console.log('helper userLoggedIn cookieUser')
-  console.log(cookieUser)
-  console.log('helper userLoggedIn db')
-  console.log(db)
+  // console.log('helper userLoggedIn cookieUser')
+  // console.log(cookieUser)
+  // console.log('helper userLoggedIn db')
+  // console.log(db)
+  if (!cookieUser) {
+    return false;
+  }
   for (let key in db) {
 
-    if (cookieUser.id === db[key].id && cookieUser.password === db[key].password) {
+    if (cookieUser.email === db[key].email) {
       return db[key];
-    }
-  }
-  return undefined;
+    } 
+  };
+
 };
 
 // Adding a user
