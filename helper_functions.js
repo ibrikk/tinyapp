@@ -22,9 +22,9 @@ const avail = (val, db) => {
 };
 
 const fetchUserData = (email, db) => {
-  for (let key in db) {
-    if (db[key].email === email) {
-      return [ db[key], db[key].password ]
+  for (let user in db) {
+    if (db[user].email === email) {
+      return [ db[user], db[user].password ]
     }
   }
   return undefined;
@@ -41,9 +41,9 @@ const checkIfOwned = (userID, urlID, db) => {
 const urlsForUser = (id, db) => {
   let currentUserId = id;
   let userURLs = {};
-  for (let key in db) {
-    if (db[key].userID == currentUserId) {
-      userURLs[key] = db[key];
+  for (let user in db) {
+    if (db[user].userID == currentUserId) {
+      userURLs[user] = db[user];
     }
   }
   return userURLs;
@@ -51,10 +51,14 @@ const urlsForUser = (id, db) => {
 // checks the current user
 const userLoggedIn = (cookieUser, db) => {
  
-  for (let key in db) {
+  console.log('helper userLoggedIn cookieUser')
+  console.log(cookieUser)
+  console.log('helper userLoggedIn db')
+  console.log(db)
 
-    if (cookieUser.id === db[key].id && cookieUser.password === db[key].password) {
-      return db[key];
+  for (let user in db) {
+    if (db[cookieUser].email === db[user].email && db[cookieUser].password === db[user].password) {
+      return db[user].id;
     }
   }
   return undefined;
