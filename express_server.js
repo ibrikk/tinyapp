@@ -17,7 +17,7 @@ app.set('view engine', 'ejs');
 
 const {
   generateRandomString,
-  notAvail,
+  avail,
   fetchUserData,
   checkShortURL,
   checkIfOwned,
@@ -37,7 +37,7 @@ const users = {
     email: 'ibrahim@khalilov.com',
     password: 'ibrik96',
   },
-  nijat12: {
+  nijat11: {
     id: 'nijat11',
     email: 'nijat11@gmail.com',
     password: 'nijat11',
@@ -70,11 +70,11 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const {email, password} = req.body;
   if (email === '') {
-    res.status(403).send('Email is missing');
+    res.status(400).send('Email is missing');
   } else if (password === '') {
-    res.status(403).send('Password is missing');
-  } else if (notAvail(email, users)) {
-    res.status(403).send('This email is not available');
+    res.status(400).send('Password is missing');
+  } else if (!avail(email, users)) {
+    res.status(400).send('This email is not available');
   } else {
     const newUser = addUser(req.body, users);
     req.session.userId = newUser.id;
@@ -97,9 +97,13 @@ app.get('/login', (req, res) => {
 app.post('/login', (req, res) => {
   const userEmail = req.body.email;
   const passwordUsed = req.body.password;
-  if (fetchUserData(userEmail, users)) {
-    const { password, id } = fetchUserData(userEmail, users);
-    if (!bcrypt.compareSync(passwordUsed, password)) {
+  const temp = fetchUserData(userEmail, users); 
+  if (temp) {
+    const [ id, password] = temp;
+    console.log('passwordUsed: ' + passwordUsed);
+    console.log('password: ' + password);
+   // if (!bcrypt.compareSync(passwordUsed, password)) {
+    if (passwordUsed !== password) {
       res.status(403).send('ERROR!!! Password incorrect');
     } else {
       req.session.userId = id;
@@ -137,7 +141,7 @@ app.post('/urls', (req, res) => {
 });
 
 app.get('/urls/new', (req, res) => {
-  const user = userLogeedIn(req.session.userId, users);
+  const user = userLoggedIn(req.session.userId, users);
   if (!user) {
     res.redirect('/login');
   } else {
@@ -177,7 +181,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 if (!checkIfOwned(userLoggedIn(req.session.userId, users), req.params.shortURL, urlDatabase)) {
   res.send('Wrong ID')
 } else {
-  delete urlDatabase[shortURL];
+  delete urlDatabase[req.params.shortURL];
   res.redirect('/urls');
 }
 });

@@ -12,19 +12,19 @@ const generateRandomString = () => {
 };
 
 // Checking if the username is registered
-const notAvail = (val, db) => {
+const avail = (val, db) => {
   for (let user in db) {
-    if (db[user].email !== val) {
-      return true;
+    if (db[user].email === val) {
+      return false;
     }
   }
-  return false;
+  return true;
 };
 
 const fetchUserData = (email, db) => {
   for (let key in db) {
     if (db[key].email === email) {
-      return db[key];
+      return [ db[key], db[key].password ]
     }
   }
   return undefined;
@@ -68,7 +68,7 @@ const addUser = (newUser, db) => {
 
 module.exports = {
   generateRandomString,
-  notAvail,
+  avail,
   fetchUserData,
   checkShortURL,
   checkIfOwned,
