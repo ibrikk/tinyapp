@@ -101,11 +101,11 @@ app.post('/login', (req, res) => {
   const passwordUsed = req.body.password;
   const temp = fetchUserData(userEmail, users); 
   if (temp) {
-    const [ id, password] = temp;
+    const [ user, password] = temp;
     if (!bcrypt.compareSync(passwordUsed, password)) {
       res.status(403).send('ERROR!!! Password incorrect');
     } else {
-      req.session.userId = id;
+      req.session.userId = user.id;
       res.redirect('/urls');
     }
   } else {
@@ -115,18 +115,15 @@ app.post('/login', (req, res) => {
 
 app.get('/urls', (req, res) => {
   const user = userLoggedIn(req.session.userId, users);
-  // console.log(user);
   if (!user) {
     res.render('urls_errors');
   } else {
     const userLinks = urlsForUser(user.id, urlDatabase);
-    // console.log('userLinks');
-    // console.log(userLinks);
     let templateVars = {
       urls: userLinks,
       currentUser: user
     };
-    res.render(`urls_index`, templateVars);
+    res.render('urls_index', templateVars);
   }
 });
 
@@ -137,7 +134,9 @@ app.post('/urls', (req, res) => {
   } else {
     const shortURL = generateRandomString();
     const newURL = req.body.longURL;
-    urlDatabase[shortURL] = { longURL: newURL, userID: user };
+    urlDatabase[shortURL] = { longURL: newURL, userID: user.id };
+   
+    
     res.redirect(`/urls/${shortURL}`);
   }
 });
@@ -154,16 +153,10 @@ app.get('/urls/new', (req, res) => {
 
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
-  console.log('shortURL');
-  console.log(shortURL);
   const user = userLoggedIn(req.session.userId, users);
-  console.log('user');
-  console.log(user);
-  console.log('urlDatabase')
-  console.log(urlDatabase)
-
   if (checkShortURL(shortURL, urlDatabase)) {
-    if (user && user.id !== urlDatabase[shortURL].userID.id) {
+   
+    if (user && user.id !== urlDatabase[shortURL].userID) {
       res.send('Wrong ID');
     } else {
       const longURL = urlDatabase[shortURL].longURL;
@@ -187,10 +180,6 @@ app.get('/u/:shortURL', (req, res) => {
 
 // Deleting a URL
 app.post('/urls/:shortURL/delete', (req, res) => {
-  console.log('req.params.shortURL')
-  console.log(req.params.shortURL)
-  console.log('req.session.userId')
-  console.log(req.session.userId)
   const user = userLoggedIn(req.session.userId, users);
   const check = checkIfOwned(user.id, req.params.shortURL, urlDatabase)
  
@@ -206,7 +195,7 @@ if (!check) {
 app.post('/urls/:shortURL/edit', (req, res) => {
   if (
     !checkIfOwned(
-      userLoggedIn(req.session.userId, users),
+      req.session.userId,
       req.params.shortURL,
       urlDatabase
     )
@@ -216,6 +205,7 @@ app.post('/urls/:shortURL/edit', (req, res) => {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect('/urls');
   }
+
 });
 
 // Logout endpoint

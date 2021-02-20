@@ -52,18 +52,14 @@ const urlsForUser = (id, db) => {
   return userURLs;
 };
 // checks the current user
-const userLoggedIn = (cookieUser, db) => {
+const userLoggedIn = (id, db) => {
  
-  // console.log('helper userLoggedIn cookieUser')
-  // console.log(cookieUser)
-  // console.log('helper userLoggedIn db')
-  // console.log(db)
-  if (!cookieUser) {
+  if (!id) {
     return false;
   }
   for (let key in db) {
 
-    if (cookieUser.email === db[key].email) {
+    if (id === db[key].id) {
       return db[key];
     } 
   };
