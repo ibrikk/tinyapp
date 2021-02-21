@@ -29,6 +29,7 @@ const fetchUserData = (email, db) => {
   }
   return undefined;
 };
+
 // Checks if a shortURL exists
 const checkShortURL = (URL, db) => {
   return db[URL];
@@ -41,6 +42,7 @@ const checkIfOwned = (userID, urlID, db) => {
   return userID === db[urlID].userID;
 };
 
+// checks the user id and returns urls if ids match
 const urlsForUser = (id, db) => {
   let currentUserId = id;
   let userURLs = {};

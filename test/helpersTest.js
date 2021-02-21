@@ -9,9 +9,9 @@ const testUsers = {
     password: 'ibrik96',
   },
   nijat12: {
-    id: 'nijat12',
-    email: 'nijat12@gmail.com',
-    password: 'nijat12',
+    id: 'nijat11',
+    email: 'nijat11@gmail.com',
+    password: 'nijat11',
   },
 };
 
@@ -24,17 +24,19 @@ describe('getUserByEmail', function () {
       password: 'ibrik96',
     };
     // Write your assert statement here
+    console.log('res');
+    console.log(res);
     assert.equal(res.id, expectedOutput.id);
     assert.equal(res.email, expectedOutput.email);
     assert.equal(res.password, expectedOutput.password);
   });
 
   it('should return a user with valid email', function () {
-    const res = fetchUserData('nijat12@gmail.com', testUsers);
+    const res = fetchUserData('nijat11@gmail.com', testUsers);
     const expectedOutput = {
-      id: 'nijat12',
-      email: 'nijat12@gmail.com',
-      password: 'nijat12',
+      id: 'nijat11',
+      email: 'nijat11@gmail.com',
+      password: 'nijat11',
     };
     assert.equal(res.id, expectedOutput.id);
     assert.equal(res.email, expectedOutput.email);

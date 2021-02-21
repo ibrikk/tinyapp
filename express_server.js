@@ -46,6 +46,8 @@ const users = {
 users.ibrik96.password = bcrypt.hashSync('ibrik96', 10);
 users.nijat11.password = bcrypt.hashSync('nijat11', 10);
 
+
+// Redirects the user depending on whether they are signed In
 app.get('/', (req, res) => {
   const user = userLoggedIn(req.session.userId, users);
   if (user) {
@@ -59,6 +61,7 @@ app.get('/urls.json', (req, res) => {
   res.json(urlDatabase);
 });
 
+
 app.get('/register', (req, res) => {
   const user = userLoggedIn(req.session.userId, users);
   if (user) {
@@ -69,6 +72,7 @@ app.get('/register', (req, res) => {
   }
 });
 
+// Register endpoint
 app.post('/register', (req, res) => {
   const {email, password} = req.body;
   if (email === '') {
@@ -96,6 +100,7 @@ app.get('/login', (req, res) => {
   }
 });
 
+// Login endpoint
 app.post('/login', (req, res) => {
   const userEmail = req.body.email;
   const passwordUsed = req.body.password;
@@ -127,6 +132,7 @@ app.get('/urls', (req, res) => {
   }
 });
 
+// If use is logged in, provides the functionality to create a short url
 app.post('/urls', (req, res) => {
   const user = userLoggedIn(req.session.userId, users)
   if (!user) {
@@ -151,6 +157,7 @@ app.get('/urls/new', (req, res) => {
   }
 });
 
+// Displays shortURLs for the user
 app.get('/urls/:shortURL', (req, res) => {
   const shortURL = req.params.shortURL;
   const user = userLoggedIn(req.session.userId, users);
@@ -167,7 +174,7 @@ app.get('/urls/:shortURL', (req, res) => {
     res.send('URL Not Found');
   }
 });
-
+// gets the data to edit/delete shortURLs
 app.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
   if (checkShortURL(shortURL, urlDatabase)) {
@@ -205,7 +212,6 @@ app.post('/urls/:shortURL/edit', (req, res) => {
     urlDatabase[req.params.shortURL].longURL = req.body.longURL;
     res.redirect('/urls');
   }
-
 });
 
 // Logout endpoint
