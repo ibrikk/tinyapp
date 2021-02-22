@@ -163,7 +163,7 @@ app.get('/urls/:shortURL', (req, res) => {
   const user = userLoggedIn(req.session.userId, users);
   if (checkShortURL(shortURL, urlDatabase)) {
    
-    if (user && user.id !== urlDatabase[shortURL].userID) {
+    if (user.id !== urlDatabase[shortURL].userID) {
       res.send('Wrong ID');
     } else {
       const longURL = urlDatabase[shortURL].longURL;
@@ -174,6 +174,8 @@ app.get('/urls/:shortURL', (req, res) => {
     res.send('URL Not Found');
   }
 });
+console.log('urlDatabase');
+console.log(urlDatabase);
 // gets the data to edit/delete shortURLs
 app.get('/u/:shortURL', (req, res) => {
   let shortURL = req.params.shortURL;
